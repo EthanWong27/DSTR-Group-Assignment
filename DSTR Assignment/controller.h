@@ -9,31 +9,15 @@
 #define CONTROLLER_H_
 
 #include <iostream>
-#include <functions.h>
+#include <fstream>
+#include <cstring>
+#include "functions.h"
 
 using namespace std;
 
-char login(string uname, string pword){
-}
-
-void mainMenu(char userType) {
-
-	if (userType == "S") { //S for sales order executive
-		cout << "1) View Purchase Order List" << endl;
-		cout << "2) Exit" << endl;
-	} else if (userType == "A") { //A for administrator
-		cout << "1) View Purchase Order List" << endl;
-		cout << "2) Generate Report" << endl;
-		cout << "3) Exit" << endl;
-	} else {
-		cout << "Error" << endl;
-	}
-}
-
-void salesOrderExecutive(int choice) {
+void salesOrderExecutive(string uname, char userType, int choice) {
 	switch (choice) {
 	case 1:
-		orderList();
 		break;
 	case 2:
 		cout << "<--- Exiting --->" << endl;
@@ -44,13 +28,11 @@ void salesOrderExecutive(int choice) {
 	}
 }
 
-void administrator(int choice) {
+void administrator(string uname, char userType, int choice) {
 	switch (choice) {
 	case 1:
-		orderList();
 		break;
 	case 2:
-		reporting();
 		break;
 	case 3:
 		cout << "<--- Exiting --->" << endl;
@@ -61,33 +43,59 @@ void administrator(int choice) {
 	}
 }
 
-int main(char userType) {
-	int cont;
-	do {
-		mainMenu(userType);
-		int choice;
+char login(string uname, string pword) {
+	string username;
+	string password;
+	string mystring;
+	string type;
+	char userType;
 
-		cout << "\n Select? " << endl;
-		cin >> choice;
+	ifstream userfile("Users.txt");
 
-		if (userType == "S") {
-			salesOrderExecutive(choice);
-		} else if (userType == "A") {
-			administrator(choice);
-		} else {
-			cout << "Error" << endl;
+	while (userfile) {
+		getline(userfile, username, '|');
+		getline(userfile, password, '|');
+		getline(userfile, type);
+		if (uname == username && pword == password) {
+			int n = type.length();
+			char char_array[n + 1];
+			strcpy(char_array, type.c_str());
+			for (int i = 0; i < n; i++) {
+				userType = char_array[i];
+				return userType;
+			}
 		}
+	}
 
-		cout << "\nContinue?" << endl;
-		cout << "1) Yes" << endl;
-		cout << "2) No" << endl;
-		cin >> cont;
+	userfile.close();
+	return 'X';
+}
 
-	} while (cont == 1);
+void mainMenu(char userType) {
+	if (userType == 'S') { //S for sales order executive
+		cout << "1) View Purchase Order List" << endl;
+		cout << "2) Exit" << endl;
+	} else if (userType == 'A') { //A for administrator
+		cout << "1) View Purchase Order List" << endl;
+		cout << "2) Generate Report" << endl;
+		cout << "3) Exit" << endl;
+	} else {
+		cout << "Error" << endl;
+	}
+}
 
-	cout << "<--- Exiting Program --->" << endl;
-
-	return 0;
+void handler(string uname, char userType) {
+	int option;
+	mainMenu(userType);
+	cout << "\nSelect: " << endl;
+	cin >> option;
+	if (userType == 'S') {
+		salesOrderExecutive(uname, userType, option);
+	} else if (userType == 'A') {
+		administrator(uname, userType, option);
+	} else {
+		cout << "Error" << endl;
+	}
 }
 
 #endif /* CONTROLLER_H_ */
